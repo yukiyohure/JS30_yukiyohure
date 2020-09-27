@@ -61,8 +61,7 @@
       margin: 0;
       width: 100%;
       transition: transform 0.5s;
-      flex: 1 0 auto; /* flex-growの値を1として指定。これによってflexアイテムの伸縮率を指定している */
-      border: 1px solid red;
+      flex: 1 0 auto; /* flex-growの値を1として指定。これによってflexアイテムの伸縮率を指定している。また、flex-basisをautoとして指定している。flex-shrinkは0を指定しているので、無効になる。 */
       display: flex;
       justify-content: center;
       align-items: center;
