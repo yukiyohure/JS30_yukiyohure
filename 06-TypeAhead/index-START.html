@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Type Ahead 👀</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <form class="search-form">
+    <input type="text" class="search" placeholder="City or State">
+    <ul class="suggestions">
+      <li>Filter for a city</li>
+      <li>or a state</li>
+    </ul>
+  </form>
+<script>
+const endpoint = 'https://gist.githubusercontent.com/Miserlou/c5cd8364bf9b2420bb29/raw/2bf258763cdddd704f8ffd3ea9a3e81d25e2c6f6/cities.json';
+
+const cities = [];
+
+const prom = fetch(endpoint) // fetch()はpromiseオブジェクトを返す
+    .then(blob => blob.json())
+    // Array.protorype.push.apply(cities, data)でもconstの配列に配列を追加できる
+    .then(data => cities.push(...data));
+
+function findMatches(wordToMatch, cities) { // 検索する関数
+  return cities.filter(place => {
+    // 検索された文字列がcitiesの市、または州にあるかを検索
+    const regex = new RegExp(wordToMatch, 'ig'); // g:まるまるこの単語にマッチするのを探す i:insensitive
+    return place.city.match(regex) || place.state.match(regex);
+  })
+}
+
+function numberWithCommas(x) {
+  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+function displayMatches() { // 検索結果を表示する関数 searchInputのイベントのcallbackから呼び出されているのでthisはinput要素のDOMになる
+  const matchArray = findMatches(this.value, cities);
+  const html = matchArray.map(place => {
+    const regex = new RegExp(this.value, 'gi');
+    const cityName = place.city.replace(regex, `<span class="hl">${this.value}</span>`); // 検索した単語をハイライトするため、'h1'クラスをつけたspanをhtmlに付与する
+    const stateName = place.state.replace(regex, `<span class="hl">${this.value}</span>`);
+    return `
+    <li>
+      <span class="name">${cityName}, ${stateName}</span>
+      <span class="population">${numberWithCommas(place.population)}</span>
+    </li>
+    `;
+  }).join(''); // そのままだとオブジェクトが返されるので全て文字列に変換する
+  suggestions.innerHTML = html;
+}
+
+const searchInput = document.querySelector('.search'); // input要素のDOM
+const suggestions = document.querySelector('.suggestions'); // リストのDOM
+
+searchInput.addEventListener('change', displayMatches); // changeだとinput入力中からinputの外へアンフォーカス(外をクリック)したときに初めての時に発火する
+searchInput.addEventListener('keyup', displayMatches); // keyupにすることで入力時:厳密に言えばキーを上げたときに発火
+
+</script>
+</body>
+</html>
